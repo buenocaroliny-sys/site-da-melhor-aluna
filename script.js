@@ -1,20 +1,57 @@
-const dicas = [
-    "🧠 Método Pomodoro: Estude por 25 minutos sem olhar o celular e descanse 5. Seu cérebro vai voar!",
-    "✍️ Explique a matéria para o seu espelho (ou seu pet). Se você conseguir explicar, você aprendeu!",
-    "📅 Tenha um Planner (ou use o Notion). O cérebro foi feito para ter ideias, não para guardar datas de provas.",
-    "🙋‍♀️ Faça perguntas na aula! Quem pergunta tira a dúvida na hora; quem se cala, sofre na véspera da prova.",
-    "💧 Hidrate-se e durma! Uma mente cansada não absorve nem fofoca, quem dirá a matéria do boletim.",
-    "🎨 Use cores nos seus resumos! Destacar conceitos importantes ajuda sua memória visual na hora do 'branco'.",
-    "🤫 Regra de ouro: O melhor aluno não é o que estuda mais horas seguidas, mas o que estuda com consistência todos os dias."
-];
+const cardsData = ['📚', '📚', '✏️', '✏️', '🧠', '🧠', '💡', '💡'];
+let flippedCards = [];
+let matchedPairs = 0;
 
-const botao = document.getElementById('btn-dica');
-const textoDica = document.getElementById('texto-dica');
+function shuffle(array) {
+    return array.sort(() => Math.random() - 0.5);
+}
 
-botao.addEventListener('click', () => {
-    // Sorteia um índice da lista de dicas
-    const indiceAleatorio = Math.floor(Math.random() * dicas.length);
+function createBoard() {
+    const grid = document.getElementById('grid');
+    if (!grid) return;
+
+    const shuffled = shuffle([...cardsData]);
     
-    // Altera o texto na tela
-    textoDica.innerText = dicas[indiceAleatorio];
-});
+    shuffled.forEach((symbol, index) => {
+        const card = document.createElement('div');
+        card.classList.add('card');
+        card.dataset.symbol = symbol;
+        card.dataset.index = index;
+        card.innerText = '?';
+        card.addEventListener('click', flipCard);
+        grid.appendChild(card);
+    });
+}
+
+function flipCard() {
+    if (flippedCards.length < 2 && !this.classList.contains('flipped')) {
+        this.classList.add('flipped');
+        this.innerText = this.dataset.symbol;
+        flippedCards.push(this);
+
+        if (flippedCards.length === 2) {
+            checkMatch();
+        }
+    }
+}
+
+function checkMatch() {
+    const [card1, card2] = flippedCards;
+    if (card1.dataset.symbol === card2.dataset.symbol) {
+        matchedPairs++;
+        flippedCards = [];
+        if (matchedPairs === cardsData.length / 2) {
+            setTimeout(() => alert('Parabéns! Você completou o desafio! 🎉'), 300);
+        }
+    } else {
+        setTimeout(() => {
+            card1.classList.remove('flipped');
+            card1.innerText = '?';
+            card2.classList.remove('flipped');
+            card2.innerText = '?';
+            flippedCards = [];
+        }, 800);
+    }
+}
+
+document.addEventListener('DOMContentLoaded', createBoard);
